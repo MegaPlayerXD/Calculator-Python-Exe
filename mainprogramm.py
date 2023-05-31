@@ -1,72 +1,65 @@
 from tkinter import *
-import smtplib
-
-#Main Screen Init
-master = Tk()
 
 
-#Functions
-def send():
-    try:
-        username = temp_username.get()
-        password = temp_password.get()
-        to       = temp_receiver.get()
-        subject  = temp_subject.get()
-        body     = temp_body.get()
-        if username=="" or password=="" or to=="" or subject=="" or body=="":
-            notif.config(text="Заполните все поля", fg="red")
-            return
+class Main(Frame):
+    def __init__(self, root):
+        super(Main, self).__init__(root)
+        self.build()
+
+    def build(self):
+        self.formula = "0"
+        self.lbl = Label(text=self.formula, font=("Times New Roman", 21, "bold"), bg="#000", foreground="#FFF")
+        self.lbl.place(x=11, y=50)
+
+        btns = [
+            "C", "DEL", "*", "=",
+            "1", "2", "3", "/",
+            "4", "5", "6", "+",
+            "7", "8", "9", "-",
+            "(", "0", ")", "X^2"
+        ]
+
+        x = 10
+        y = 140
+        for bt in btns:
+            com = lambda x=bt: self.logicalc(x)
+            Button(text=bt, bg="#FFF",
+                   font=("Times New Roman", 15),
+                   command=com).place(x=x, y=y,
+                                      width=115,
+                                      height=79)
+            x += 117
+            if x > 400:
+                x = 10
+                y += 81
+
+    def logicalc(self, operation):
+        if operation == "C":
+            self.formula = ""
+        elif operation == "DEL":
+            self.formula = self.formula[0:-1]
+        elif operation == "X^2":
+            self.formula = str((eval(self.formula))**2)
+        elif operation == "=":
+            self.formula = str(eval(self.formula))
         else:
-            finalMessage = 'Тема: {}\n\n{}'.format(subject, body)
-            server = smtplib.SMTP_SSL('smtp.mail.ru', 465)
-            server.login(username, password)
-            server.sendmail(username,to,finalMessage)
-            notif.config(text="Сообщение было отправлено", fg="green")
-    except:
-        notif.config(text="Ошибка отправки", fg="red")
+            if self.formula == "0":
+                self.formula = ""
+            self.formula += operation
+        self.update()
+
+    def update(self):
+        if self.formula == "":
+            self.formula = "0"
+        self.lbl.configure(text=self.formula)
 
 
-def reset():
-  usernameEntry.delete(0,'end')
-  passwordEntry.delete(0,'end')
-  receiverEntry.delete(0,'end')
-  subjectEntry.delete(0,'end')
-  bodyEntry.delete(0,'end')
-
-#Labels
-Label(master, text="mail.ru почтовый клиент", font=('Calibri',15)).grid(row=0, sticky=N)
-Label(master, text="Внимание в поле своей почты нужно использовать почты Mail.ru и для отправки сообщений используйте внешний пароль", font=('Calibri',11)).grid(row=1, sticky=W, padx=5 ,pady=10)
-
-Label(master, text="Ваша почта", font=('Calibri', 11)).grid(row=2,sticky=W, padx=5)
-Label(master, text="Ваш пароль", font=('Calibri', 11)).grid(row=3,sticky=W, padx=5)
-Label(master, text="Кому", font=('Calibri', 11)).grid(row=4,sticky=W, padx=5)
-Label(master, text="Тема", font=('Calibri', 11)).grid(row=5,sticky=W, padx=5)
-Label(master, text="Сообщение", font=('Calibri', 11)).grid(row=6,sticky=W, padx=5)
-notif = Label(master, text="", font=('Calibri', 11),fg="red")
-notif.grid(row=7,sticky=S)
-
-#Storage
-temp_username = StringVar()
-temp_password = StringVar()
-temp_receiver = StringVar()
-temp_subject  = StringVar()
-temp_body     = StringVar()
-
-#Entries
-usernameEntry = Entry(master, textvariable = temp_username)
-usernameEntry.grid(row=2,column=0)
-passwordEntry = Entry(master, textvariable = temp_password)
-passwordEntry.grid(row=3,column=0)
-receiverEntry  = Entry(master, textvariable = temp_receiver)
-receiverEntry.grid(row=4,column=0)
-subjectEntry  = Entry(master, textvariable = temp_subject)
-subjectEntry.grid(row=5,column=0)
-bodyEntry     = Entry(master, textvariable = temp_body)
-bodyEntry.grid(row=6,column=0)
-
-#Buttons
-Button(master, text = "Отправить", command = send).grid(row=7,   sticky=W,  pady=15, padx=5)
-Button(master, text = "Сброс", command = reset).grid(row=8,  sticky=W,  padx=5, pady=15)
-
-#Mainloop
-master.mainloop()
+if __name__ == '__main__':
+    root = Tk()
+    root["bg"] = "#000"
+    root.geometry("485x550+200+200")
+    root.title("Калькулятор")
+    root.resizable(False, False)
+    app = Main(root)
+    app.pack()
+    root.mainloop()
